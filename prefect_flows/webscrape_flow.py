@@ -1,5 +1,4 @@
-from prefect import flow 
-from prefect import task 
+from prefect import flow, task
 from tasks.extract_webscrape.webscraper import web_scraper
 
 @flow
