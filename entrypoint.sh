@@ -24,7 +24,12 @@ else
   exec "$@"
 fi
 
-# #Below are additional entrypoint setup for the pipeline
+# Below are additional entrypoint setup for the pipeline
+
+#always get updated source code 
+cd /opt/sentiment_analysis_pipeline
+git pull
+
 # #azure account login 
 # az login
 
