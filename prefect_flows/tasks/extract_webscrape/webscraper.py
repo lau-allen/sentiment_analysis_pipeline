@@ -1,6 +1,7 @@
 #libraries 
 from bs4 import BeautifulSoup
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service 
 from webdriver_manager.chrome import ChromeDriverManager
 
@@ -33,8 +34,13 @@ class web_scraper:
         return 1,1
         
     def all_links(self) -> dict:
+        #define driver options 
+        chrome_options = Options()
+        chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--headless')
+        chrome_options.add_argument('--disable-dev-shm-usage')
         #define google chrome driver for selenium request 
-        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()),options=chrome_options)
         #define dictionary of data 
         url_linkdata = {}
         #request HTML from url and store into a dictionary format
