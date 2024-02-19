@@ -1,25 +1,50 @@
 #!/bin/bash
+# This is the default entrypoint for the official Prefect Docker image
+set -e
 
-#azure account login 
-az login
-
-#get Prefect cloud API key from Azure Key Vault 
-export PREFECT__CLOUD__API_KEY=$(az keyvault secret show --vault-name prefectsentimentanalysis --name prefect-key --query value -o tsv)
-
-#check if secrete retrieval was successful 
-if [ $? -ne 0 ]; then
-    echo "Error retrieving Prefect Cloud API key from Azure Key Vault"
-    exit 1
+if [ -f ~/.bashrc ]; then
+  . ~/.bashrc
 fi
 
-#log message for successful key retrieval 
-echo "Prefect Cloud API key retrieved successfully."
+if [ ! -z "$EXTRA_PIP_PACKAGES" ]; then
+  echo "+pip install $EXTRA_PIP_PACKAGES"
+  pip install $EXTRA_PIP_PACKAGES
+fi
 
-#login to prefect cloud
-prefect cloud login -k $PREFECT__CLOUD__API_KEY
+if [ -z "$*" ]; then
+  echo "\
+  ___ ___ ___ ___ ___ ___ _____ 
+ | _ \ _ \ __| __| __/ __|_   _|
+ |  _/   / _|| _|| _| (__  | |  
+ |_| |_|_\___|_| |___\___| |_|  
 
-#run defined deployment 
-prefect deployment run webscrape-extract/webscrape-extract
+"
+  exec bash --login
+else
+  exec "$@"
+fi
 
-#start default agent 
-prefect agent start -q 'default' --run-once
+# #Below are additional entrypoint setup for the pipeline
+# #azure account login 
+# az login
+
+# #get Prefect cloud API key from Azure Key Vault 
+# export PREFECT__CLOUD__API_KEY=$(az keyvault secret show --vault-name prefectsentimentanalysis --name prefect-key --query value -o tsv)
+
+# #check if secrete retrieval was successful 
+# if [ $? -ne 0 ]; then
+#     echo "Error retrieving Prefect Cloud API key from Azure Key Vault"
+#     exit 1
+# fi
+
+# #log message for successful key retrieval 
+# echo "Prefect Cloud API key retrieved successfully."
+
+# #login to prefect cloud
+# prefect cloud login -k $PREFECT__CLOUD__API_KEY
+
+# #run defined deployment 
+# prefect deployment run webscrape-extract/webscrape-extract
+
+# #start default agent 
+# prefect agent start -q 'default' --run-once

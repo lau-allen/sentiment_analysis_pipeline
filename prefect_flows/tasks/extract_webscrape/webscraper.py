@@ -1,6 +1,8 @@
 #libraries 
-import requests
 from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service 
+from webdriver_manager.chrome import ChromeDriverManager
 
 class web_scraper:
     """
@@ -31,19 +33,21 @@ class web_scraper:
         return 1,1
         
     def all_links(self) -> dict:
+        #define google chrome driver for selenium request 
+        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
         #define dictionary of data 
         url_linkdata = {}
         #request HTML from url and store into a dictionary format
         for url in self.data_sources:
-            #request site 
-            r = requests.get(url, headers={'user-agent': 'my-app/0.0.1'})
+            #request data 
+            driver.get(url)
             #create bs4 soup 
-            soup = BeautifulSoup(r.text,'lxml')
+            soup = BeautifulSoup(driver.page_source, features='lxml')
             #filter for links and link titles 
             url_data = self.url_soup_filter(soup)
 
             #add data into dict 
-            url_linkdata[url] = r 
+            url_linkdata[url] = url_data 
         return url_linkdata
     
 
