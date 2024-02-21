@@ -4,6 +4,9 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service 
 from webdriver_manager.chrome import ChromeDriverManager
+import asyncio
+import aiohttp
+import async_timeout
 
 class web_scraper:
     """
@@ -20,18 +23,6 @@ class web_scraper:
         """
         self.data_sources = url_sources
         self.length = len(self.data_sources)
-
-
-    def url_soup_filter(self,soup) -> tuple:
-        print(soup.find_all('li',{'class': 'story-item svelte-j82fdi'}))
-        
-        #find <a> tages used for links, where tags have href attribute from soup object
-        #all_href = map(lambda x: x.get('href'),soup.find_all('a',href=True))
-
-        #print(list(all_href))
-        #filter to url links 
-        #url = filter(lambda x: filter_function(x,config.block_list,config.ad_block_list), all_href)
-        return 1,1
         
     def all_links(self) -> dict:
         #define driver options 
@@ -48,19 +39,65 @@ class web_scraper:
             #request data 
             driver.get(url)
             #create bs4 soup 
-            soup = BeautifulSoup(driver.page_source, features='lxml')
-            #filter for links and link titles 
-            url_data = self.url_soup_filter(soup)
-
+            soup = BeautifulSoup(driver.page_source,'lxml')
+            #filter for links
+            all_href = map(lambda x: x.get('href'),soup.find_all('a',href=True))
             #add data into dict 
-            url_linkdata[url] = url_data 
-        return url_linkdata
-    
+            url_linkdata[url] = all_href 
 
+        return url_linkdata
+
+    #async get html from url 
+    async def get_html(self,session, url):
+        #get html text from session object 
+        try:
+            async with async_timeout.timeout(10):
+                async with session.get(url) as response:
+                    return await response.text(), url
+        #if timeout, return "TimeoutError" and url as tuple 
+        except asyncio.exceptions.TimeoutError:
+            return "Error: Timeout", url
+        #if invalid url, return "InvalidURL" and url as tuple 
+        except aiohttp.client_exceptions.InvalidURL:
+            return "Error: InvaidURL", url 
+        #if server disconnected, return "ServerDisconnected" and url as tuple
+        except aiohttp.client_exceptions.ServerDisconnectedError:
+            return 'Error: ServerDisconnected', url 
+        except UnicodeDecodeError:
+            return 'Error: UnicodeDecodeError', url
+        except aiohttp.client_exceptions.ClientConnectorError:
+            return 'Error: ClientConnectorError', url
+
+    #define tasks for the urls 
+    async def get_all(self,session, urls):
+        tasks = []
+        #for each url, create a task to get html for the defined session object and url 
+        for url in urls:
+            task = asyncio.create_task(self.get_html(session, url))
+            tasks.append(task)
+        #return all the tasks 
+        results = await asyncio.gather(*tasks)
+        return results 
+
+    async def async_req(self,urls):
+        #context manager for aiohttp session object 
+        async with aiohttp.ClientSession() as session:
+            #get data obtained from get_all with defined session object and urls 
+            data = await self.get_all(session, urls)
+            #return list of data, where each element is a tuple containing html, url 
+            return data
 
 
 if __name__ == '__main__':
+    #define urls to scrape 
     urls = ['https://finance.yahoo.com/news/']
+    #define web_scraper obj 
     ws = web_scraper(urls)
-    test = ws.all_links()
+    #retrieve all links 
+    links = ws.all_links()
+    #perform URL filtering/validation 
+    #<place in prefect flow or task>
+
+    #async requests 
+    
     
