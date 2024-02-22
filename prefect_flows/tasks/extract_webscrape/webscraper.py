@@ -7,6 +7,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 import asyncio
 import aiohttp
 import async_timeout
+from functools import reduce 
 
 class web_scraper:
     """
@@ -138,6 +139,18 @@ class web_scraper:
         else:
             text_url_tup = asyncio.run(self.async_req(urls))
         return text_url_tup
+
+    def get_raw_text(self,text):
+        soup = BeautifulSoup(text,'lxml')
+        try: 
+            title = soup.title.get_text()
+        except AttributeError:
+            title = "N/A"
+        for script in soup(['script','style','template','TemplateString','ProcessingInstruction','Declaration','Doctype']):
+            script.extract()
+        text = [item.text.strip().replace(u'\xa0', u' ') for item in soup.find_all('p')]
+        return reduce(lambda x,y: x+' '+y,text,''), title 
+
 
 
 if __name__ == '__main__':
