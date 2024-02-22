@@ -58,6 +58,22 @@ def yahoo_url_filter(urls:list) -> list:
             filtered_urls[i] = 'https://finance.yahoo.com'+filtered_urls[i]
     return filtered_urls
 
+@task 
+def marketwatch_url_filter(urls:list) -> list:
+    """
+    Definition of task to perform URL filtering and data validation for 
+    MarketWatch News 
+
+    Args:
+        urls (list): List of URLs 
+
+    Returns:
+        list: formatted and cleaned list of URLs to request data from 
+    """
+    #filter unwanted links 
+    filtered_urls = list(filter(lambda url: url.startswith('https://www.marketwatch.com/story'), urls))
+    return filtered_urls
+
 @flow 
 def extract_yahoo_finance_news(ws:web_scraper,website:str) -> list:
     """
@@ -73,6 +89,27 @@ def extract_yahoo_finance_news(ws:web_scraper,website:str) -> list:
     #perform filter of unwanted links and append domain if needed 
     filtered_urls = yahoo_url_filter(ws.url_to_links[website]) 
     #update yahoo finance key 
+    ws.url_to_links[website] = filtered_urls
+    #extract data
+    data = extract_news_text(ws,website)
+    #return data
+    return data
+
+@flow 
+def extract_marketwatch_news(ws:web_scraper,website:str) -> list:
+    """
+    Definition of sub-flow to extract MarketWatch News 
+
+    Args:
+        ws (web_scraper): web_scraper object containing the URLs to be scraped 
+        website (str): top-level website string
+
+    Returns:
+        list: list of tuples (HTML data, URL Source)
+    """
+    #perform filter of unwanted links and append domain if needed 
+    filtered_urls = marketwatch_url_filter(ws.url_to_links[website]) 
+    #update marketwatch key 
     ws.url_to_links[website] = filtered_urls
     #extract data
     data = extract_news_text(ws,website)
@@ -105,15 +142,13 @@ def webscrape_extract() -> None:
     defined top-level finance news sources 
     """
     #define list of finance websites to scrape 
-    websites = ['https://finance.yahoo.com/news/','https://www.reuters.com/business/finance/']
+    websites = ['https://finance.yahoo.com/news/','https://www.marketwatch.com/latest-news?mod=top_nav']
     #kickoff extract_urls_to_news links flow
     ws = extract_urls_to_news(websites)
     #kickoff yahoo finance extract sub-flow 
     yahoo_data = extract_yahoo_finance_news(ws,websites[0])
-    # TESTING #
-    print(yahoo_data[0])
-    #kickoff reuters finance extract sub-flow 
-    
+    #kickoff marketwatch extract sub-flow 
+    marketwatch_data = extract_marketwatch_news(ws,websites[1])
     return 
 
 
