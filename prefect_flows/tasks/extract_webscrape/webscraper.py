@@ -34,6 +34,7 @@ class web_scraper:
         chrome_options.add_argument('--disable-dev-shm-usage')
         #define google chrome driver for selenium request 
         driver = webdriver.Chrome(service=Service('/usr/local/bin/chromedriver'),options=chrome_options)
+        print('I am here')
         #sync access to shared dictionary property to avoid race conditions
         async with self.lock:
             #request data 
@@ -42,29 +43,28 @@ class web_scraper:
             soup = BeautifulSoup(driver.page_source,'lxml')
             #filter for links
             all_href = [x.get('href') for x in soup.find_all('a', href=True)]
+            print(all_href)
             #add data into dict property 
             self.url_to_links[url] = all_href
         #quit driver 
         driver.quit()
         return 
 
-    async def get_urls(self,session:aiohttp.ClientSession, urls:list) -> list:
+    async def get_urls(self,session:aiohttp.ClientSession, urls:list) -> None:
         tasks = []
         #for each url, create a task to get links for the defined session object and url 
         for url in urls:
             task = asyncio.create_task(self.get_links(session, url))
             tasks.append(task)
-        #return all the tasks 
-        results = await asyncio.gather(*tasks)
-        return results 
+        await asyncio.gather(*tasks)
+        return  
 
-    async def all_links_req(self,urls:list) -> list:
+    async def all_links_req(self,urls:list) -> None:
         #context manager for aiohttp session object 
         async with aiohttp.ClientSession() as session:
             #get data obtained from get_all with defined session object and urls 
-            data = await self.get_urls(session, urls)
-            #return list of data, where each element is a tuple containing html, url 
-            return data
+            await self.get_urls(session, urls)
+            return 
 
     def all_links(self) -> None:
         """
