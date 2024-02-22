@@ -73,23 +73,7 @@ class web_scraper:
 
         Set class url_to_links property with associated webpage:links data         
         """
-        #define driver options 
-        chrome_options = Options()
-        chrome_options.add_argument('--no-sandbox')
-        chrome_options.add_argument('--headless')
-        chrome_options.add_argument('--disable-dev-shm-usage')
-        #define google chrome driver for selenium request 
-        driver = webdriver.Chrome(service=Service('/usr/local/bin/chromedriver'),options=chrome_options)
-        #request HTML from url and store into a dictionary format
-        for url in self.data_sources:
-            #request data 
-            driver.get(url)
-            #create bs4 soup 
-            soup = BeautifulSoup(driver.page_source,'lxml')
-            #filter for links
-            all_href = [x.get('href') for x in soup.find_all('a', href=True)]
-            #add data into dict property 
-            self.url_to_links[url] = all_href
+        asyncio.run(self.all_links_req(self.url_to_links))
         return 
 
     #async get html from url 
