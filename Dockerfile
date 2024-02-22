@@ -4,7 +4,6 @@ FROM prefecthq/prefect:2-python3.10-conda
 #dependencies
 RUN apt-get update && apt-get install -y \
     git \
-    azure-cli \
     wget \
     unzip 
 
