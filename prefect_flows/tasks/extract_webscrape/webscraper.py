@@ -10,7 +10,7 @@ from functools import reduce
 
 class web_scraper:
     """
-    web_scaper object encapsulates all logic for 
+    web_scraper object encapsulates all logic for 
     web scraping HTML data sources
     """
 
@@ -25,57 +25,67 @@ class web_scraper:
         self.data_sources = url_sources
         #dictionary containing top-level URL key and links values within top-level URL 
         self.url_to_links = {} 
+        #define async lock property to avoid race conditions
+        self.lock = asyncio.Lock()
 
-    async def get_links(self,session:aiohttp.ClientSession, url:str) -> None:
-        #define driver options 
-        chrome_options = Options()
-        chrome_options.add_argument('--no-sandbox')
-        chrome_options.add_argument('--headless')
-        chrome_options.add_argument('--disable-dev-shm-usage')
-        #define google chrome driver for selenium request 
-        driver = webdriver.Chrome(service=Service('/usr/local/bin/chromedriver'),options=chrome_options)
-        print('I am here')
-        #sync access to shared dictionary property to avoid race conditions
-        async with self.lock:
+    async def get_links(self, url:str) -> None:
+        """
+        Define Chrome driver and perform Selenium requests for link data from specified URL
+
+        Args:
+            url (str): defined URL to scrape
+        """
+        try:
+            #define driver options 
+            chrome_options = Options()
+            chrome_options.add_argument('--no-sandbox')
+            chrome_options.add_argument('--headless')
+            chrome_options.add_argument('--disable-dev-shm-usage')
+            #define google chrome driver for selenium request 
+            driver = webdriver.Chrome(service=Service('/usr/local/bin/chromedriver'),options=chrome_options)
             #request data 
             driver.get(url)
             #create bs4 soup 
             soup = BeautifulSoup(driver.page_source,'lxml')
             #filter for links
-            all_href = [x.get('href') for x in soup.find_all('a', href=True)]
-            print(all_href)
-            #add data into dict property 
-            self.url_to_links[url] = all_href
-        #quit driver 
-        driver.quit()
+            all_href = [x.get('href') for x in soup.find_all('a', href=True)]            
+            #sync access to shared dictionary property to avoid race conditions
+            async with self.lock:
+                #add data into dict property 
+                self.url_to_links[url] = all_href
+        finally:
+            #quit driver 
+            driver.quit()
         return 
 
-    async def get_urls(self,session:aiohttp.ClientSession, urls:list) -> None:
+    async def get_urls(self, urls:list) -> None:
+        """
+        Define async tasks to get the URLs existing on a list of top-level URLs. Wait for all tasks to complete. 
+
+        Args:
+            urls (list): List of top-level URLs to scrape for links. 
+        """
         tasks = []
         #for each url, create a task to get links for the defined session object and url 
         for url in urls:
-            task = asyncio.create_task(self.get_links(session, url))
+            task = asyncio.create_task(self.get_links(url))
             tasks.append(task)
+        #async tasks 
         await asyncio.gather(*tasks)
         return  
 
-    async def all_links_req(self,urls:list) -> None:
-        #context manager for aiohttp session object 
-        async with aiohttp.ClientSession() as session:
-            #get data obtained from get_all with defined session object and urls 
-            await self.get_urls(session, urls)
-            return 
-
     def all_links(self) -> None:
         """
+        Wrapper function for get_urls
+        
         Retrieve all links existing on a top-level webpage using headless chrome driver and selenium 
         to load JS webpage artifacts. 
 
         Set class url_to_links property with associated webpage:links data         
         """
-        asyncio.run(self.all_links_req(self.url_to_links))
+        asyncio.run(self.get_urls(self.data_sources))
         return 
-
+    
     #async get html from url 
     async def get_html(self,session:aiohttp.ClientSession, url:str) -> tuple:
         """
