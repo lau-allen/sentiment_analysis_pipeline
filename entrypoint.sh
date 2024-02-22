@@ -47,3 +47,6 @@ git pull
 
 # #start default agent 
 # prefect agent start -q 'default' --run-once
+
+# Start an interactive shell at the end
+exec /bin/bash
