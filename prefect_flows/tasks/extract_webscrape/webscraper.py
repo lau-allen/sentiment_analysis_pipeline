@@ -25,7 +25,47 @@ class web_scraper:
         self.data_sources = url_sources
         #dictionary containing top-level URL key and links values within top-level URL 
         self.url_to_links = {} 
-        
+
+    async def get_links(self,session:aiohttp.ClientSession, url:str) -> None:
+        #define driver options 
+        chrome_options = Options()
+        chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--headless')
+        chrome_options.add_argument('--disable-dev-shm-usage')
+        #define google chrome driver for selenium request 
+        driver = webdriver.Chrome(service=Service('/usr/local/bin/chromedriver'),options=chrome_options)
+        #sync access to shared dictionary property to avoid race conditions
+        async with self.lock:
+            #request data 
+            driver.get(url)
+            #create bs4 soup 
+            soup = BeautifulSoup(driver.page_source,'lxml')
+            #filter for links
+            all_href = [x.get('href') for x in soup.find_all('a', href=True)]
+            #add data into dict property 
+            self.url_to_links[url] = all_href
+        #quit driver 
+        driver.quit()
+        return 
+
+    async def get_urls(self,session:aiohttp.ClientSession, urls:list) -> list:
+        tasks = []
+        #for each url, create a task to get links for the defined session object and url 
+        for url in urls:
+            task = asyncio.create_task(self.get_links(session, url))
+            tasks.append(task)
+        #return all the tasks 
+        results = await asyncio.gather(*tasks)
+        return results 
+
+    async def all_links_req(self,urls:list) -> list:
+        #context manager for aiohttp session object 
+        async with aiohttp.ClientSession() as session:
+            #get data obtained from get_all with defined session object and urls 
+            data = await self.get_urls(session, urls)
+            #return list of data, where each element is a tuple containing html, url 
+            return data
+
     def all_links(self) -> None:
         """
         Retrieve all links existing on a top-level webpage using headless chrome driver and selenium 
@@ -47,9 +87,9 @@ class web_scraper:
             #create bs4 soup 
             soup = BeautifulSoup(driver.page_source,'lxml')
             #filter for links
-            all_href = map(lambda x: x.get('href'),soup.find_all('a',href=True))
+            all_href = [x.get('href') for x in soup.find_all('a', href=True)]
             #add data into dict property 
-            self.url_to_links[url] = list(all_href)
+            self.url_to_links[url] = all_href
         return 
 
     #async get html from url 
