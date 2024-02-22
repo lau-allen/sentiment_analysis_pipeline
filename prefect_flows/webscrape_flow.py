@@ -147,8 +147,12 @@ def webscrape_extract() -> None:
     ws = extract_urls_to_news(websites)
     #kickoff yahoo finance extract sub-flow 
     yahoo_data = extract_yahoo_finance_news(ws,websites[0])
+    print(yahoo_data[0])
+    print(len(yahoo_data))
     #kickoff marketwatch extract sub-flow 
     marketwatch_data = extract_marketwatch_news(ws,websites[1])
+    print(marketwatch_data[0])
+    print(len(marketwatch_data))
     return 
 
 

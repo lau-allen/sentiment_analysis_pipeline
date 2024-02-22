@@ -140,15 +140,29 @@ class web_scraper:
             text_url_tup = asyncio.run(self.async_req(urls))
         return text_url_tup
 
-    def get_raw_text(self,text):
-        soup = BeautifulSoup(text,'lxml')
+    def get_raw_text(self,html:str):
+        """
+        Function to retrieve paragraph text from news articles
+
+        Args:
+            text (str): raw HTML data 
+
+        Returns:
+            tuple: Tuple of paragraph text and title of article 
+        """
+        #define BS4 object with defined HTML data 
+        soup = BeautifulSoup(html,'lxml')
         try: 
+            #get article title if exists 
             title = soup.title.get_text()
         except AttributeError:
             title = "N/A"
+        #loop through paragraph tags and extract string information
         for script in soup(['script','style','template','TemplateString','ProcessingInstruction','Declaration','Doctype']):
             script.extract()
+        #perform additional preprocessing steps like removing white spaces and binary formatting
         text = [item.text.strip().replace(u'\xa0', u' ') for item in soup.find_all('p')]
+        #return paragraph text
         return reduce(lambda x,y: x+' '+y,text,''), title 
 
 
