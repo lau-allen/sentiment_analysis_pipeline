@@ -21,10 +21,18 @@ class web_scraper:
         Args:
             url_sources (list): list of URLs to scrape 
         """
+        #top-level URLs to scrape 
         self.data_sources = url_sources
-        self.length = len(self.data_sources)
+        #dictionary containing top-level URL key and links values within top-level URL 
+        self.url_to_links = {} 
         
-    def all_links(self) -> dict:
+    def all_links(self) -> None:
+        """
+        Retrieve all links existing on a top-level webpage using headless chrome driver and selenium 
+        to load JS webpage artifacts. 
+
+        Set class url_to_links property with associated webpage:links data         
+        """
         #define driver options 
         chrome_options = Options()
         chrome_options.add_argument('--no-sandbox')
@@ -32,8 +40,6 @@ class web_scraper:
         chrome_options.add_argument('--disable-dev-shm-usage')
         #define google chrome driver for selenium request 
         driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()),options=chrome_options)
-        #define dictionary of data 
-        url_linkdata = {}
         #request HTML from url and store into a dictionary format
         for url in self.data_sources:
             #request data 
@@ -42,13 +48,22 @@ class web_scraper:
             soup = BeautifulSoup(driver.page_source,'lxml')
             #filter for links
             all_href = map(lambda x: x.get('href'),soup.find_all('a',href=True))
-            #add data into dict 
-            url_linkdata[url] = all_href 
-
-        return url_linkdata
+            #add data into dict property 
+            self.url_to_links[url] = list(all_href)
+        return 
 
     #async get html from url 
-    async def get_html(self,session, url):
+    async def get_html(self,session:aiohttp.ClientSession, url:str) -> tuple:
+        """
+        Async request task for retriving HTML data from defined URL 
+
+        Args:
+            session (aiohttp.ClientSession): aiohttp ClientSession object for async workflow
+            url (str): URL to request HTML data 
+
+        Returns:
+            tuple: HTML text, URL source ---OR--- Error message, URL Source 
+        """
         #get html text from session object 
         try:
             async with async_timeout.timeout(10):
@@ -69,7 +84,18 @@ class web_scraper:
             return 'Error: ClientConnectorError', url
 
     #define tasks for the urls 
-    async def get_all(self,session, urls):
+    async def get_all(self,session:aiohttp.ClientSession, urls:list) -> list:
+        """
+        Define tasks for async workflow to get HTML text from list of URL sources and 
+        asynchronously requests HTML data. 
+
+        Args:
+            session (aiohttp.ClientSession): aiohttp ClientSession object for async workflow
+            urls (list): URLs to request HTML data
+
+        Returns:
+            list: list of tuples (HTML data, URL Source)
+        """
         tasks = []
         #for each url, create a task to get html for the defined session object and url 
         for url in urls:
@@ -79,7 +105,17 @@ class web_scraper:
         results = await asyncio.gather(*tasks)
         return results 
 
-    async def async_req(self,urls):
+    async def async_req(self,urls:list) -> list:
+        """
+        Definition of aiohttp Client Session object for async workflow and calls 
+        to async functions to retrive HTML data from defined URLs 
+
+        Args:
+            urls (list): list of URLs to request HTML data 
+
+        Returns:
+            list: list of tuples (HTML data, URL source)
+        """
         #context manager for aiohttp session object 
         async with aiohttp.ClientSession() as session:
             #get data obtained from get_all with defined session object and urls 
@@ -87,17 +123,22 @@ class web_scraper:
             #return list of data, where each element is a tuple containing html, url 
             return data
 
+    def async_request(self,urls=None) -> list:
+        """
+        Wrapper function for self.async_req()
+
+        Args:
+            urls (list, optional): list of URLs to request HTML data from. Defaults to None.
+
+        Returns:
+            list: list of tuples (HTML data, URL source)
+        """
+        if urls == None:
+            text_url_tup = asyncio.run(self.async_req(self.url_to_links.values()))
+        else:
+            text_url_tup = asyncio.run(self.async_req(urls))
+        return text_url_tup
+
 
 if __name__ == '__main__':
-    #define urls to scrape 
-    urls = ['https://finance.yahoo.com/news/']
-    #define web_scraper obj 
-    ws = web_scraper(urls)
-    #retrieve all links 
-    links = ws.all_links()
-    #perform URL filtering/validation 
-    #<place in prefect flow or task>
-
-    #async requests 
-    
-    
+    pass
