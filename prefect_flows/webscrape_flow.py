@@ -1,13 +1,122 @@
+#libraries
 from prefect import flow, task
 from tasks.extract_webscrape.webscraper import web_scraper
+import config
 
-@flow
-def webscrape_extract():
-    urls = ['https://finance.yahoo.com/news/']
-    ws = web_scraper(urls)
-    print(ws.length)
+def url_filter(url:str,block_set:set) -> bool:
+    """
+    Filter function to remove un-needed URLs from results. 
+
+    Args:
+        url (str): URL string 
+        block_set (set): Set of unwanted URL strings 
+
+    Returns:
+        bool: T/F
+    """
+    if url in block_set:
+        return False
+    else:
+        return True 
+    
+def get_raw_text():
 
     return 
 
+@task 
+def extract_news_text(ws:web_scraper,website:str) -> list:
+    """
+    Definiton of task to extract HTML data from news links from a defined website. 
+
+    Args:
+        ws (web_scraper): web_scraper object containing the URLs to be scraped 
+        website (str): defined top-level website 
+
+    Returns:
+        list: list of tuples (HTML data, URL Source)
+    """
+    #perform async requests of news articles 
+    return ws.async_request(ws.url_to_links[website])
+
+@task 
+def yahoo_url_filter(urls:list) -> list:
+    """
+    Definition of task to perform URL filtering and data validation for 
+    Yahoo Finance News 
+
+    Args:
+        urls (list): List of URLs 
+
+    Returns:
+        list: formatted and cleaned list of URLs to request data from 
+    """
+    #filter unwanted links 
+    filtered_urls = list(filter(lambda url: url_filter(url,config.yahoo_fin_block_set), urls))
+    #perform data validation on URLs to ensure they are complete URLs 
+    for i in range(len(filtered_urls)):
+        if not filtered_urls[i].startswith('https'):
+            filtered_urls[i] = 'https://finance.yahoo.com'+filtered_urls[i]
+    return filtered_urls
+
+@flow 
+def extract_yahoo_finance_news(ws:web_scraper,website:str) -> list:
+    """
+    Definition of sub-flow to extract Yahoo Finance News 
+
+    Args:
+        ws (web_scraper): web_scraper object containing the URLs to be scraped 
+        website (str): top-level website string
+
+    Returns:
+        list: list of tuples (HTML data, URL Source)
+    """
+    #perform filter of unwanted links and append domain if needed 
+    filtered_urls = yahoo_url_filter(ws.url_to_links[website]) 
+    #update yahoo finance key 
+    ws.url_to_links[website] = filtered_urls
+    #extract data
+    data = extract_news_text(ws,website)
+    #return data
+    return data
+
+@flow 
+def extract_urls_to_news(urls:list) -> web_scraper:
+    """
+    Defintion of sub-flow to extract links to news articles 
+    from top-level news source websites 
+
+    Args:
+        urls (list): List of top-level news sources
+
+    Returns:
+        web_scraper: web_scraper object containing the URLs to be scraped and implementation to scrape websites 
+    """
+    #define web_scraper object with defined list of urls
+    ws = web_scraper(urls)
+    #retrieve all links from top-level URL 
+    ws.all_links()
+    #return the web_scraper object 
+    return ws 
+
+@flow
+def webscrape_extract() -> None:
+    """
+    Defintion of main extract entry flow to obtain HTML data from 
+    defined top-level finance news sources 
+    """
+    #define list of finance websites to scrape 
+    websites = ['https://finance.yahoo.com/news/','https://www.reuters.com/business/finance/']
+    #kickoff extract_urls_to_news links flow
+    ws = extract_urls_to_news(websites)
+    #kickoff yahoo finance extract sub-flow 
+    yahoo_data = extract_yahoo_finance_news(ws,websites[0])
+    #kickoff reuters finance extract sub-flow 
+    
+    return 
+
+
+
+
 if __name__ == '__main__':
+    #kickoff webscrape extract flow 
     webscrape_extract()
