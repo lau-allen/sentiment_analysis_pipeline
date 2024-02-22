@@ -110,6 +110,8 @@ def webscrape_extract() -> None:
     ws = extract_urls_to_news(websites)
     #kickoff yahoo finance extract sub-flow 
     yahoo_data = extract_yahoo_finance_news(ws,websites[0])
+    # TESTING #
+    print(yahoo_data[0])
     #kickoff reuters finance extract sub-flow 
     
     return 
