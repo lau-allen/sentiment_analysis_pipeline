@@ -13,10 +13,8 @@ fi
 
 if [ -z "$*" ]; then
   echo "\
-  ___ ___ ___ ___ ___ ___ _____ 
- | _ \ _ \ __| __| __/ __|_   _|
- |  _/   / _|| _|| _| (__  | |  
- |_| |_|_\___|_| |___\___| |_|  
+
+Sentiment Analysis Pipeline 
 
 "
   exec bash --login
@@ -26,9 +24,11 @@ fi
 
 # Below are additional entrypoint setup for the pipeline
 
-#always get updated source code 
+#always get updated source code
+print('Testing')
 cd /opt/sentiment_analysis_pipeline
 git pull
+print('Testing2')
 
 # #azure account login 
 # az login

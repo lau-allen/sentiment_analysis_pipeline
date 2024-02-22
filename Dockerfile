@@ -31,5 +31,6 @@ ENV AZURE_KEY_VAULT_URI=https://prefectsentimentanalysis.vault.azure.net/
 #ensure permissions to run entrypoint 
 RUN chmod +x /opt/sentiment_analysis_pipeline/entrypoint.sh
 #run entry point script 
+WORKDIR /opt/sentiment_analysis_pipeline
 ENTRYPOINT ["/opt/sentiment_analysis_pipeline/entrypoint.sh"]
 
