@@ -10,9 +10,18 @@ RUN apt-get update && apt-get install -y \
 #install Azure CLI 
 RUN pip install azure-cli
 
-#install chrome and dependencies 
-RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-RUN apt install -y ./google-chrome-stable_current_amd64.deb
+#specify desired versions
+ENV CHROME_VERSION=114.0.5735.90
+ENV CHROMEDRIVER_VERSION=114.0.5735.90
+
+#install Chrome and dependencies 
+RUN wget https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_${CHROME_VERSION}-1_amd64.deb
+RUN apt install -y ./google-chrome-stable_${CHROME_VERSION}-1_amd64.deb
+
+#install ChromeDriver for Selenium Workflows 
+RUN wget https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip
+RUN unzip chromedriver_linux64.zip -d /usr/local/bin/
+RUN rm chromedriver_linux64.zip
 
 #change working dir 
 WORKDIR /opt 

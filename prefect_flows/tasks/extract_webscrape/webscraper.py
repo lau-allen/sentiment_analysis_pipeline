@@ -3,7 +3,6 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service 
-from webdriver_manager.chrome import ChromeDriverManager
 import asyncio
 import aiohttp
 import async_timeout
@@ -40,7 +39,7 @@ class web_scraper:
         chrome_options.add_argument('--headless')
         chrome_options.add_argument('--disable-dev-shm-usage')
         #define google chrome driver for selenium request 
-        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()),options=chrome_options)
+        driver = webdriver.Chrome(service=Service('/usr/local/bin/chromedriver'),options=chrome_options)
         #request HTML from url and store into a dictionary format
         for url in self.data_sources:
             #request data 
