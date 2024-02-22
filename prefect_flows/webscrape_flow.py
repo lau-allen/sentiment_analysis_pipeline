@@ -18,25 +18,25 @@ def url_filter(url:str,block_set:set) -> bool:
         return False
     else:
         return True 
-    
-def get_raw_text():
-
-    return 
 
 @task 
 def extract_news_text(ws:web_scraper,website:str) -> list:
     """
-    Definiton of task to extract HTML data from news links from a defined website. 
+    Definiton of task to extract raw text data from news links from a defined website. 
 
     Args:
         ws (web_scraper): web_scraper object containing the URLs to be scraped 
         website (str): defined top-level website 
 
     Returns:
-        list: list of tuples (HTML data, URL Source)
+        list: list of tuples ((text, title of article),URL source)
     """
-    #perform async requests of news articles 
-    return ws.async_request(ws.url_to_links[website])
+    #perform async requests of news articles, returns tuples of (raw HTML data, URL source) 
+    data = ws.async_request(ws.url_to_links[website])
+    #get raw text from news articles 
+    data = map(lambda x: (ws.get_raw_text(x[0]),x[1]),data)
+    #return tuple of (raw text data, URL source)
+    return list(data)
 
 @task 
 def yahoo_url_filter(urls:list) -> list:
