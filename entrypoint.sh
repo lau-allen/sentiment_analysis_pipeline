@@ -12,23 +12,17 @@ if [ ! -z "$EXTRA_PIP_PACKAGES" ]; then
 fi
 
 if [ -z "$*" ]; then
-  echo "\
-
-Sentiment Analysis Pipeline 
-
-"
-  exec bash --login
+  echo -e "\nSentiment Analysis Pipeline \n"
+  bash --login
 else
-  exec "$@"
+  "$@"
 fi
 
 # Below are additional entrypoint setup for the pipeline
 
 #always get updated source code
-print('Testing')
 cd /opt/sentiment_analysis_pipeline
 git pull
-print('Testing2')
 
 # #azure account login 
 # az login
