@@ -7,6 +7,7 @@ from prefect_dask import DaskTaskRunner, get_dask_client
 import dask 
 import dask.distributed
 
+#initialize dask client for parallelization of flows 
 client = dask.distributed.Client()
 
 
@@ -81,7 +82,7 @@ def marketwatch_url_filter(urls:list) -> list:
 @task 
 def extract_yahoo_finance_news(ws:web_scraper,website:str) -> list:
     """
-    Definition of sub-flow to extract Yahoo Finance News 
+    Definition of task to extract Yahoo Finance News 
 
     Args:
         ws (web_scraper): web_scraper object containing the URLs to be scraped 
@@ -103,7 +104,7 @@ def extract_yahoo_finance_news(ws:web_scraper,website:str) -> list:
 @task 
 def extract_marketwatch_news(ws:web_scraper,website:str) -> list:
     """
-    Definition of sub-flow to extract MarketWatch News 
+    Definition of task to extract MarketWatch News 
 
     Args:
         ws (web_scraper): web_scraper object containing the URLs to be scraped 
@@ -158,8 +159,11 @@ def extract_news(web_scraper,websites):
     future_yahoo = extract_yahoo_finance_news.submit(web_scraper,websites[0])
     future_marketwatch = extract_marketwatch_news.submit(web_scraper,websites[1])
     
+    #return dask client 
     with get_dask_client():
+        #upload webscraper implmenetation to dask workers 
         client.upload_file('/opt/sentiment_analysis_pipeline/prefect_flows/implementations/extract_webscrape/webscraper.py')
+        #retrive data 
         yahoo_data = future_yahoo.result()
         marketwatch_data = future_marketwatch.result()
     return yahoo_data, marketwatch_data
@@ -174,10 +178,14 @@ def webscrape_extract() -> None:
     websites = ['https://finance.yahoo.com/news/','https://www.marketwatch.com/latest-news?mod=top_nav']
     #kickoff extract_urls_to_news links flow
     ws = extract_urls_to_news(websites)
-    
+    #extract text data from the defined websites 
     yahoo_data,marketwatch_data = extract_news(ws,websites)
 
+
+    #testing 
     print(f'LENGTH OF DATA : {len(yahoo_data)},{len(marketwatch_data)}')
+
+    
 
     return 
 
