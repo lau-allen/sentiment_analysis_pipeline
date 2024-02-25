@@ -1,6 +1,7 @@
 #libraries
 from prefect import flow, task
-from implementations.extract_webscrape.webscraper import web_scraper
+#from implementations.extract_webscrape.webscraper import web_scraper
+from webscraper import web_scraper
 import config
 import asyncio
 from prefect_dask import DaskTaskRunner, get_dask_client
@@ -159,7 +160,7 @@ def extract_news(web_scraper,websites):
     future_marketwatch = extract_marketwatch_news.submit(web_scraper,websites[1])
     
     with get_dask_client():
-        client.upload_directory('/opt/sentiment_analysis_pipeline/')
+        client.upload_directory('/opt/sentiment_analysis_pipeline/prefect_flows/implementations/extract_webscrape/webscraper.py')
         yahoo_data = future_yahoo.result()
         marketwatch_data = future_marketwatch.result()
     return yahoo_data, marketwatch_data
