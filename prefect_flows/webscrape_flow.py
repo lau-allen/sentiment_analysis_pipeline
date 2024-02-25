@@ -1,11 +1,13 @@
 #libraries
-import sys
-sys.path.append('/opt/sentiment_analysis_pipeline/prefect_flows/implementations')
 from prefect import flow, task
 from implementations.extract_webscrape.webscraper import web_scraper
 import config
 import asyncio
-from prefect_dask.task_runners import DaskTaskRunner
+from prefect_dask import DaskTaskRunner, get_dask_client
+import dask 
+import dask.distributed
+
+client = dask.distributed.Client()
 
 
 def url_filter(url:str,block_set:set) -> bool:
@@ -138,7 +140,7 @@ def extract_urls_to_news(urls:list) -> web_scraper:
     #return the web_scraper object 
     return ws 
 
-@flow(task_runner=DaskTaskRunner())
+@flow(task_runner=DaskTaskRunner(address=client.scheduler.address))
 def extract_news(web_scraper,websites):
     """
     Extract text information from news links existing on the top-level websites given. 
@@ -156,8 +158,10 @@ def extract_news(web_scraper,websites):
     future_yahoo = extract_yahoo_finance_news.submit(web_scraper,websites[0])
     future_marketwatch = extract_marketwatch_news.submit(web_scraper,websites[1])
     
-    yahoo_data = future_yahoo.result()
-    marketwatch_data = future_marketwatch.result()
+    with get_dask_client():
+        client.upload_directory('/opt/sentiment_analysis_pipeline/')
+        yahoo_data = future_yahoo.result()
+        marketwatch_data = future_marketwatch.result()
     return yahoo_data, marketwatch_data
 
 @flow
