@@ -43,7 +43,7 @@ echo "Prefect Cloud API key retrieved successfully."
 prefect cloud login -k $PREFECT__CLOUD__API_KEY
 
 #run defined deployment 
-prefect deployment run webscrape-extract/webscrape-extract
+prefect deployment run webscrape_extract/webscrape-extract
 
 #start default agent 
 prefect agent start -q 'default' --run-once
