@@ -1,12 +1,12 @@
 #libraries
+import sys
+sys.path.append('/opt/sentiment_analysis_pipeline/prefect_flows/implementations')
 from prefect import flow, task
 from implementations.extract_webscrape.webscraper import web_scraper
 import config
 import asyncio
 from prefect_dask.task_runners import DaskTaskRunner
-import sys
 
-sys.path.append('/opt/sentiment_analysis_pipeline/prefect_flows/implementations')
 
 def url_filter(url:str,block_set:set) -> bool:
     """
