@@ -1,6 +1,6 @@
 #libraries
 from prefect import flow, task
-from tasks.extract_webscrape.webscraper import web_scraper
+from implementations.extract_webscrape.webscraper import web_scraper
 import config
 import asyncio
 from prefect_dask.task_runners import DaskTaskRunner
