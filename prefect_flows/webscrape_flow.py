@@ -2,6 +2,8 @@
 from prefect import flow, task
 from tasks.extract_webscrape.webscraper import web_scraper
 import config
+import asyncio
+from prefect_dask.task_runners import DaskTaskRunner
 
 def url_filter(url:str,block_set:set) -> bool:
     """
@@ -19,7 +21,6 @@ def url_filter(url:str,block_set:set) -> bool:
     else:
         return True 
 
-@task 
 def extract_news_text(ws:web_scraper,website:str) -> list:
     """
     Definiton of task to extract raw text data from news links from a defined website. 
@@ -32,13 +33,12 @@ def extract_news_text(ws:web_scraper,website:str) -> list:
         list: list of tuples ((text, title of article),URL source)
     """
     #perform async requests of news articles, returns tuples of (raw HTML data, URL source) 
-    data = ws.async_request(ws.url_to_links[website])
+    data = asyncio.run(ws.async_req(ws.url_to_links[website]))
     #get raw text from news articles 
     data = map(lambda x: (ws.get_raw_text(x[0]),x[1]),data)
     #return tuple of (raw text data, URL source)
     return list(data)
 
-@task 
 def yahoo_url_filter(urls:list) -> list:
     """
     Definition of task to perform URL filtering and data validation for 
@@ -58,7 +58,6 @@ def yahoo_url_filter(urls:list) -> list:
             filtered_urls[i] = 'https://finance.yahoo.com'+filtered_urls[i]
     return filtered_urls
 
-@task 
 def marketwatch_url_filter(urls:list) -> list:
     """
     Definition of task to perform URL filtering and data validation for 
@@ -74,7 +73,7 @@ def marketwatch_url_filter(urls:list) -> list:
     filtered_urls = list(filter(lambda url: url.startswith('https://www.marketwatch.com/story'), urls))
     return filtered_urls
 
-@flow 
+@task 
 def extract_yahoo_finance_news(ws:web_scraper,website:str) -> list:
     """
     Definition of sub-flow to extract Yahoo Finance News 
@@ -95,7 +94,8 @@ def extract_yahoo_finance_news(ws:web_scraper,website:str) -> list:
     #return data
     return data
 
-@flow 
+
+@task 
 def extract_marketwatch_news(ws:web_scraper,website:str) -> list:
     """
     Definition of sub-flow to extract MarketWatch News 
@@ -135,6 +135,28 @@ def extract_urls_to_news(urls:list) -> web_scraper:
     #return the web_scraper object 
     return ws 
 
+@flow(task_runner=DaskTaskRunner())
+def extract_news(web_scraper,websites):
+    """
+    Extract text information from news links existing on the top-level websites given. 
+    Perform flow using Dask Clusters for parallelization of work. Retrieval of text within
+    news links is performed asynchronously using asyncio, asynchttp 
+
+    Args:
+        web_scraper (web_scraper): web_scraper object that contains async methods and URL info 
+        websites (list): list of top-level websites to scrape 
+
+    Returns:
+        tuple: tuple of lists containing (text data, title, URL source)
+    """
+    #PrefectFuture Object 
+    future_yahoo = extract_yahoo_finance_news.submit(web_scraper,websites[0])
+    future_marketwatch = extract_marketwatch_news.submit(web_scraper,websites[1])
+    
+    yahoo_data = future_yahoo.result()
+    marketwatch_data = future_marketwatch.result()
+    return yahoo_data, marketwatch_data
+
 @flow
 def webscrape_extract() -> None:
     """
@@ -145,17 +167,12 @@ def webscrape_extract() -> None:
     websites = ['https://finance.yahoo.com/news/','https://www.marketwatch.com/latest-news?mod=top_nav']
     #kickoff extract_urls_to_news links flow
     ws = extract_urls_to_news(websites)
-    #kickoff yahoo finance extract sub-flow 
-    yahoo_data = extract_yahoo_finance_news(ws,websites[0])
-    print(yahoo_data[0])
-    print(len(yahoo_data))
-    #kickoff marketwatch extract sub-flow 
-    marketwatch_data = extract_marketwatch_news(ws,websites[1])
-    print(marketwatch_data[0])
-    print(len(marketwatch_data))
+    
+    yahoo_data,marketwatch_data = extract_news(ws,websites)
+
+    print(f'LENGTH OF DATA : {len(yahoo_data)},{len(marketwatch_data)}')
+
     return 
-
-
 
 
 if __name__ == '__main__':

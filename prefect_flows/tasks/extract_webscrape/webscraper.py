@@ -201,4 +201,9 @@ class web_scraper:
 
 
 if __name__ == '__main__':
+    # #define list of finance websites to scrape 
+    # websites = ['https://finance.yahoo.com/news/','https://www.marketwatch.com/latest-news?mod=top_nav']
+    # ws = web_scraper(websites)
+    # #kickoff extract_urls_to_news links flow
+    # ws.all_links()
     pass
