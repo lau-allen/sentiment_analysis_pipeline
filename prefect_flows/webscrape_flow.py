@@ -159,7 +159,7 @@ def extract_news(web_scraper,websites):
     future_marketwatch = extract_marketwatch_news.submit(web_scraper,websites[1])
     
     with get_dask_client():
-        client.upload_directory('/opt/sentiment_analysis_pipeline/prefect_flows/implementations/extract_webscrape/webscraper.py')
+        client.upload_file('/opt/sentiment_analysis_pipeline/prefect_flows/implementations/extract_webscrape/webscraper.py')
         yahoo_data = future_yahoo.result()
         marketwatch_data = future_marketwatch.result()
     return yahoo_data, marketwatch_data
