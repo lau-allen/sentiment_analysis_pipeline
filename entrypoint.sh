@@ -24,29 +24,69 @@ cd /opt/sentiment_analysis_pipeline
 git config pull.rebase false
 git pull
 
-#azure account login 
-az login
+#TESTING CODE TO CHECKOUT TO BRANCHES 
+echo "Choose a branch to check out:"
+echo "1. Main"
+echo "2. Dev"
 
-#get Prefect cloud API key from Azure Key Vault 
-export PREFECT__CLOUD__API_KEY=$(az keyvault secret show --vault-name prefectsentimentanalysis --name prefect-key --query value -o tsv)
+read -p "Enter your choice (1 or 2): " choice
 
-#check if secrete retrieval was successful 
-if [ $? -ne 0 ]; then
-    echo "Error retrieving Prefect Cloud API key from Azure Key Vault"
-    exit 1
-fi
+case $choice in
+    1)
+        git checkout main
+        ;;
+    2)
+        git checkout dev
+        ;;
+    *)
+        echo "Invalid choice. Please enter 1 or 2."
+        ;;
+esac
 
-#log message for successful key retrieval 
-echo "Prefect Cloud API key retrieved successfully."
+#present options to either run Prefect Cloud Deployment Workflow or just enter command line 
+echo "Enter 1 to run Prefect Cloud Deployment. Enter 2 to enter command line."
+read -p "Enter Option (1 or 2): " choice 
 
-#login to prefect cloud
-prefect cloud login -k $PREFECT__CLOUD__API_KEY
+case $choice in
+  1) 
+    echo "Running Prefect Cloud Deployment."
 
-#run defined deployment 
-prefect deployment run webscrape-extract/webscrape-extract
+    #azure account login 
+    az login
 
-#start default agent 
-prefect agent start -q 'default' --run-once
+    #get Prefect cloud API key from Azure Key Vault 
+    export PREFECT__CLOUD__API_KEY=$(az keyvault secret show --vault-name prefectsentimentanalysis --name prefect-key --query value -o tsv)
 
-# Start an interactive shell at the end
-exec /bin/bash
+    #check if secrete retrieval was successful 
+    if [ $? -ne 0 ]; then
+        echo "Error retrieving Prefect Cloud API key from Azure Key Vault"
+        exit 1
+    fi
+
+    #log message for successful key retrieval 
+    echo "Prefect Cloud API key retrieved successfully."
+
+    #login to prefect cloud
+    prefect cloud login -k $PREFECT__CLOUD__API_KEY
+
+    #run defined deployment 
+    prefect deployment run webscrape-extract/webscrape-extract
+
+    #start default agent 
+    prefect agent start -q 'default' --run-once
+
+    # Start an interactive shell at the end
+    exec /bin/bash
+    ;; 
+  
+  2) 
+    echo "Entering Command Line." 
+    # Start an interactive shell at the end
+    exec /bin/bash
+    ;; 
+  
+  *) 
+    echo "Invalid Choice. Please enter 1 or 2."
+    ;;
+
+esac
