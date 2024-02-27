@@ -164,7 +164,7 @@ def extract_news(web_scraper:web_scraper,websites:list) -> None:
         yahoo_data = future_yahoo.result()
         marketwatch_data = future_marketwatch.result()
     
-    return [yahoo_data,marketwatch_data]
+    return [('finance_yahoo_news',yahoo_data),('marketwatch_latest_news',marketwatch_data)]
 
 @flow 
 def push_to_s3(data:list) -> None:
@@ -180,7 +180,7 @@ def push_to_s3(data:list) -> None:
     t_stamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
     #write data to json in temp dir 
     for website,d in data:
-        i_o.write_to_json(d,f'{website}_data_{t_stamp}')
+        i_o.write_to_json(d,f'{website}_{t_stamp}')
     #push data to s3 bucket 
     i_o.pushObject_to_S3()
     #clean up io object 
@@ -198,9 +198,7 @@ def webscrape_extract() -> None:
     #kickoff extract_urls_to_news links flow
     ws = extract_urls_to_news(websites)
     #extract text data from the defined websites 
-    data_list = extract_news(ws,websites)
-    #zip website with data 
-    website_datalist = list(zip(websites,data_list))
+    website_datalist = extract_news(ws,websites)
     #push data into cloud storage 
     push_to_s3(website_datalist)
     return 
