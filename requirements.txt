@@ -5,3 +5,4 @@ lxml==4.9.3
 aiohttp==3.8.1
 async-timeout==4.0.1
 prefect-dask==0.2.6
+prefect-aws==0.4.9

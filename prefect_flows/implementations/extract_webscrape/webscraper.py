@@ -25,8 +25,6 @@ class web_scraper:
         self.data_sources = url_sources
         #dictionary containing top-level URL key and links values within top-level URL 
         self.url_to_links = {} 
-        #dictionary containing links from top-level URL to its html data 
-        self.links_to_data = {}
         #define async lock property to avoid race conditions
         self.lock = asyncio.Lock()
 

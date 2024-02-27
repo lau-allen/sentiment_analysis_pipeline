@@ -178,7 +178,7 @@ def webscrape_extract() -> None:
     yahoo_data,marketwatch_data = extract_news(ws,websites)
 
     print(f'LENGTH OF DATA {len(yahoo_data)}, {len(marketwatch_data)}')
-    print(yahoo_data)
+    #print(yahoo_data)
     return 
 
 

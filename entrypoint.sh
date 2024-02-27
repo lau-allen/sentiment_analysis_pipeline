@@ -69,11 +69,11 @@ case $choice in
     #login to prefect cloud
     prefect cloud login -k $PREFECT__CLOUD__API_KEY
 
-    #run defined deployment 
-    prefect deployment run webscrape-extract/webscrape-extract
+    # #run defined deployment 
+    # prefect deployment run webscrape-extract/webscrape-extract
 
-    #start default agent 
-    prefect agent start -q 'default' --run-once
+    # #start default agent 
+    # prefect agent start -q 'default' --run-once
 
     # Start an interactive shell at the end
     exec /bin/bash
