@@ -141,7 +141,7 @@ class web_scraper:
         results = await asyncio.gather(*tasks)
         return results 
 
-    async def async_req(self,urls:list) -> None:
+    async def async_req(self,urls:list) -> dict:
         """
         Definition of aiohttp Client Session object for async workflow and calls 
         to async functions to retrive HTML data from defined URLs 
@@ -150,19 +150,16 @@ class web_scraper:
             urls (list): list of URLs to request HTML data 
 
         Returns:
-            list: list of tuples (HTML data, URL source)
+            dict: dictionary of link to data, where data is (text, title)
         """
         #context manager for aiohttp session object 
         async with aiohttp.ClientSession() as session:
             #get data obtained from get_all with defined session object and urls 
             data = await self.get_all(session, urls)
-            #sync access to shared dictionary property to avoid race conditions
-            async with self.lock:
-                #return list of data, where each element is a tuple containing html, url
-                self.links_to_data.update({link:self.get_raw_text(html) for html,link in data})
-            return 
+            #return dictionary of link to data, where data is (text, title)
+            return {link:self.get_raw_text(html) for html,link in data} 
 
-    def async_request(self,urls:list) -> None:
+    def async_request(self,urls:list) -> dict:
         """
         Wrapper function for self.async_req()
 
@@ -170,10 +167,9 @@ class web_scraper:
             urls (list, optional): list of URLs to request HTML data from. Defaults to None.
 
         Returns:
-            list: list of tuples (HTML data, URL source)
+            dict: dictionary of link to data, where data is (text, title)
         """
-        asyncio.run(self.async_req(urls))
-        return
+        return asyncio.run(self.async_req(urls))
 
     def get_raw_text(self,html:str) -> tuple:
         """

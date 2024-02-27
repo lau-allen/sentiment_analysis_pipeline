@@ -27,7 +27,7 @@ def url_filter(url:str,block_set:set) -> bool:
     else:
         return True 
 
-def extract_news_text(ws:web_scraper,website:str) -> None:
+def extract_news_text(ws:web_scraper,website:str) -> dict:
     """
     Definiton of task to extract raw text data from news links from a defined website. 
 
@@ -39,8 +39,8 @@ def extract_news_text(ws:web_scraper,website:str) -> None:
         list: list of tuples ((text, title of article),URL source)
     """
     #perform async requests of news articles, returns tuples of (raw HTML data, URL source) 
-    ws.async_request(ws.url_to_links[website])
-    return 
+    link_to_data = ws.async_request(ws.url_to_links[website])
+    return link_to_data
 
 def yahoo_url_filter(urls:list) -> list:
     """
@@ -77,7 +77,7 @@ def marketwatch_url_filter(urls:list) -> list:
     return filtered_urls
 
 @task 
-def extract_yahoo_finance_news(ws:web_scraper,website:str) -> None:
+def extract_yahoo_finance_news(ws:web_scraper,website:str) -> dict:
     """
     Definition of task to extract Yahoo Finance News 
 
@@ -93,12 +93,12 @@ def extract_yahoo_finance_news(ws:web_scraper,website:str) -> None:
     #update yahoo finance key 
     ws.url_to_links[website] = filtered_urls
     #extract data
-    extract_news_text(ws,website)
-    return
+    link_to_data = extract_news_text(ws,website)
+    return link_to_data
 
 
 @task 
-def extract_marketwatch_news(ws:web_scraper,website:str) -> None:
+def extract_marketwatch_news(ws:web_scraper,website:str) -> dict:
     """
     Definition of task to extract MarketWatch News 
 
@@ -114,8 +114,8 @@ def extract_marketwatch_news(ws:web_scraper,website:str) -> None:
     #update marketwatch key 
     ws.url_to_links[website] = filtered_urls
     #extract data
-    extract_news_text(ws,website)
-    return
+    link_to_data = extract_news_text(ws,website)
+    return link_to_data
 
 @flow 
 def extract_urls_to_news(urls:list) -> web_scraper:
@@ -161,7 +161,8 @@ def extract_news(web_scraper:web_scraper,websites:list) -> None:
         #retrive data 
         yahoo_data = future_yahoo.result()
         marketwatch_data = future_marketwatch.result()
-    return 
+    
+    return yahoo_data,marketwatch_data
 
 @flow
 def webscrape_extract() -> None:
@@ -174,15 +175,10 @@ def webscrape_extract() -> None:
     #kickoff extract_urls_to_news links flow
     ws = extract_urls_to_news(websites)
     #extract text data from the defined websites 
-    extract_news(ws,websites)
+    yahoo_data,marketwatch_data = extract_news(ws,websites)
 
-    #testing 
-    print(len(ws.url_to_links))
-    print(len(ws.links_to_data))
-    print(ws.links_to_data)
-
-    
-
+    print(f'LENGTH OF DATA {len(yahoo_data)}, {len(marketwatch_data)}')
+    print(yahoo_data)
     return 
 
 
