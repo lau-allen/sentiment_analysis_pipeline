@@ -164,7 +164,7 @@ def extract_news(web_scraper:web_scraper,websites:list) -> None:
         yahoo_data = future_yahoo.result()
         marketwatch_data = future_marketwatch.result()
     
-    return list(yahoo_data,marketwatch_data)
+    return [yahoo_data,marketwatch_data]
 
 @flow 
 def push_to_s3(data:list) -> None:
