@@ -177,6 +177,8 @@ def webscrape_extract() -> None:
     extract_news(ws,websites)
 
     #testing 
+    print(len(ws.url_to_links))
+    print(len(ws.links_to_data))
     print(ws.links_to_data)
 
     
