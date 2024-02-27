@@ -6,6 +6,8 @@ import asyncio
 from prefect_dask import DaskTaskRunner, get_dask_client
 import dask 
 import dask.distributed
+from implementations.io.io import io
+import datetime 
 
 #initialize dask client for parallelization of flows 
 client = dask.distributed.Client()
@@ -162,7 +164,28 @@ def extract_news(web_scraper:web_scraper,websites:list) -> None:
         yahoo_data = future_yahoo.result()
         marketwatch_data = future_marketwatch.result()
     
-    return yahoo_data,marketwatch_data
+    return list(yahoo_data,marketwatch_data)
+
+@flow 
+def push_to_s3(data:list) -> None:
+    """
+    Push data to S3 Bucket 
+
+    Args:
+        data (list): list of tuples (website name, dict of data)
+    """
+    #define io object 
+    i_o = io()
+    #define timestamp for file name 
+    t_stamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    #write data to json in temp dir 
+    for website,d in data:
+        i_o.write_to_json(d,f'{website}_data_{t_stamp}')
+    #push data to s3 bucket 
+    i_o.pushObject_to_S3()
+    #clean up io object 
+    del i_o
+    return 
 
 @flow
 def webscrape_extract() -> None:
@@ -175,10 +198,11 @@ def webscrape_extract() -> None:
     #kickoff extract_urls_to_news links flow
     ws = extract_urls_to_news(websites)
     #extract text data from the defined websites 
-    yahoo_data,marketwatch_data = extract_news(ws,websites)
-
-    print(f'LENGTH OF DATA {len(yahoo_data)}, {len(marketwatch_data)}')
-    #print(yahoo_data)
+    data_list = extract_news(ws,websites)
+    #zip website with data 
+    website_datalist = list(zip(websites,data_list))
+    #push data into cloud storage 
+    push_to_s3(website_datalist)
     return 
 
 
