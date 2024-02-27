@@ -27,7 +27,7 @@ def url_filter(url:str,block_set:set) -> bool:
     else:
         return True 
 
-def extract_news_text(ws:web_scraper,website:str) -> list:
+def extract_news_text(ws:web_scraper,website:str) -> None:
     """
     Definiton of task to extract raw text data from news links from a defined website. 
 
@@ -39,11 +39,8 @@ def extract_news_text(ws:web_scraper,website:str) -> list:
         list: list of tuples ((text, title of article),URL source)
     """
     #perform async requests of news articles, returns tuples of (raw HTML data, URL source) 
-    data = asyncio.run(ws.async_req(ws.url_to_links[website]))
-    #get raw text from news articles 
-    data = map(lambda x: (ws.get_raw_text(x[0]),x[1]),data)
-    #return tuple of (raw text data, URL source)
-    return list(data)
+    ws.async_request(ws.url_to_links[website])
+    return 
 
 def yahoo_url_filter(urls:list) -> list:
     """
@@ -80,7 +77,7 @@ def marketwatch_url_filter(urls:list) -> list:
     return filtered_urls
 
 @task 
-def extract_yahoo_finance_news(ws:web_scraper,website:str) -> list:
+def extract_yahoo_finance_news(ws:web_scraper,website:str) -> None:
     """
     Definition of task to extract Yahoo Finance News 
 
@@ -96,13 +93,12 @@ def extract_yahoo_finance_news(ws:web_scraper,website:str) -> list:
     #update yahoo finance key 
     ws.url_to_links[website] = filtered_urls
     #extract data
-    data = extract_news_text(ws,website)
-    #return data
-    return data
+    extract_news_text(ws,website)
+    return
 
 
 @task 
-def extract_marketwatch_news(ws:web_scraper,website:str) -> list:
+def extract_marketwatch_news(ws:web_scraper,website:str) -> None:
     """
     Definition of task to extract MarketWatch News 
 
@@ -118,9 +114,8 @@ def extract_marketwatch_news(ws:web_scraper,website:str) -> list:
     #update marketwatch key 
     ws.url_to_links[website] = filtered_urls
     #extract data
-    data = extract_news_text(ws,website)
-    #return data
-    return data
+    extract_news_text(ws,website)
+    return
 
 @flow 
 def extract_urls_to_news(urls:list) -> web_scraper:
@@ -142,7 +137,7 @@ def extract_urls_to_news(urls:list) -> web_scraper:
     return ws 
 
 @flow(task_runner=DaskTaskRunner(address=client.scheduler.address))
-def extract_news(web_scraper,websites):
+def extract_news(web_scraper:web_scraper,websites:list) -> None:
     """
     Extract text information from news links existing on the top-level websites given. 
     Perform flow using Dask Clusters for parallelization of work. Retrieval of text within
@@ -166,7 +161,7 @@ def extract_news(web_scraper,websites):
         #retrive data 
         yahoo_data = future_yahoo.result()
         marketwatch_data = future_marketwatch.result()
-    return yahoo_data, marketwatch_data
+    return 
 
 @flow
 def webscrape_extract() -> None:
@@ -179,11 +174,10 @@ def webscrape_extract() -> None:
     #kickoff extract_urls_to_news links flow
     ws = extract_urls_to_news(websites)
     #extract text data from the defined websites 
-    yahoo_data,marketwatch_data = extract_news(ws,websites)
-
+    extract_news(ws,websites)
 
     #testing 
-    print(f'LENGTH OF DATA : {len(yahoo_data)},{len(marketwatch_data)}')
+    print(ws.links_to_data)
 
     
 

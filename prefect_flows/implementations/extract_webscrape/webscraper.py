@@ -25,6 +25,8 @@ class web_scraper:
         self.data_sources = url_sources
         #dictionary containing top-level URL key and links values within top-level URL 
         self.url_to_links = {} 
+        #dictionary containing links from top-level URL to its html data 
+        self.links_to_data = {}
         #define async lock property to avoid race conditions
         self.lock = asyncio.Lock()
 
@@ -139,7 +141,7 @@ class web_scraper:
         results = await asyncio.gather(*tasks)
         return results 
 
-    async def async_req(self,urls:list) -> list:
+    async def async_req(self,urls:list) -> None:
         """
         Definition of aiohttp Client Session object for async workflow and calls 
         to async functions to retrive HTML data from defined URLs 
@@ -154,10 +156,13 @@ class web_scraper:
         async with aiohttp.ClientSession() as session:
             #get data obtained from get_all with defined session object and urls 
             data = await self.get_all(session, urls)
-            #return list of data, where each element is a tuple containing html, url 
-            return data
+            #sync access to shared dictionary property to avoid race conditions
+            async with self.lock:
+                #return list of data, where each element is a tuple containing html, url
+                self.links_to_data.update({link:self.get_raw_text(html) for html,link in data})
+            return 
 
-    def async_request(self,urls=None) -> list:
+    def async_request(self,urls:list) -> None:
         """
         Wrapper function for self.async_req()
 
@@ -167,13 +172,10 @@ class web_scraper:
         Returns:
             list: list of tuples (HTML data, URL source)
         """
-        if urls == None:
-            text_url_tup = asyncio.run(self.async_req(self.url_to_links.values()))
-        else:
-            text_url_tup = asyncio.run(self.async_req(urls))
-        return text_url_tup
+        asyncio.run(self.async_req(urls))
+        return
 
-    def get_raw_text(self,html:str):
+    def get_raw_text(self,html:str) -> tuple:
         """
         Function to retrieve paragraph text from news articles
 
