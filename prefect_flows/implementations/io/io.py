@@ -63,7 +63,7 @@ class io:
             f (str): path to file object 
         """
         #await pushing object to bucket 
-        await self.s3_bucket.upload_from_path(f)
+        self.s3_bucket.upload_from_path(f)
         return 
 
     async def async_push_to_s3(self,paths:list) -> None:
