@@ -180,7 +180,7 @@ def push_to_s3(data:list) -> None:
     t_stamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
     #write data to json in temp dir 
     for website,d in data:
-        i_o.write_to_json(d,f'{website}_{t_stamp}')
+        i_o.write_to_json(d,f'{t_stamp}_{website}')
     #push data to s3 bucket 
     i_o.pushObject_to_S3()
     #clean up io object 
