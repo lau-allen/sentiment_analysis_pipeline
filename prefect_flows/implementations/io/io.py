@@ -7,12 +7,15 @@ import asyncio
 
 class io:
 
-    def __init__(self):
+    def __init__(self,bucket_block:str):
         """
         Generator function 
+
+        Args:
+            bucket_block (str): Name of bucket prefect block
         """
         #define s3 block
-        self.s3_bucket = S3Bucket.load('pipeline-webscrape-extract')
+        self.s3_bucket = S3Bucket.load(bucket_block)
         #define temp directory
         self.temp_dir = tempfile.TemporaryDirectory()
 
@@ -62,7 +65,7 @@ class io:
         Args:
             f (str): path to file object 
         """
-        #await pushing object to bucket 
+        #await pushing object to bucket (defined bucket to push to configured in IAM user's policy permissions)
         self.s3_bucket.upload_from_path(f)
         return 
 

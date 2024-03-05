@@ -167,7 +167,7 @@ def extract_news(web_scraper:web_scraper,websites:list) -> None:
     return [('finance_yahoo_news',yahoo_data),('marketwatch_latest_news',marketwatch_data)]
 
 @flow 
-def push_to_s3(data:list) -> None:
+def push_to_s3(bucket_block: str, data:list) -> None:
     """
     Push data to S3 Bucket 
 
@@ -175,7 +175,7 @@ def push_to_s3(data:list) -> None:
         data (list): list of tuples (website name, dict of data)
     """
     #define io object 
-    i_o = io()
+    i_o = io(bucket_block)
     #define timestamp for file name 
     t_stamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
     #write data to json in temp dir 
@@ -200,7 +200,7 @@ def webscrape_extract() -> None:
     #extract text data from the defined websites 
     website_datalist = extract_news(ws,websites)
     #push data into cloud storage 
-    push_to_s3(website_datalist)
+    push_to_s3('sap-webscrape-extract-s3-bucket',website_datalist)
     return 
 
 
