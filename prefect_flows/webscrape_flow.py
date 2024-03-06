@@ -194,13 +194,13 @@ def webscrape_extract() -> None:
     defined top-level finance news sources 
     """
     #define list of finance websites to scrape 
-    websites = ['https://finance.yahoo.com/news/','https://www.marketwatch.com/latest-news?mod=top_nav']
+    websites = config.top_level_websites
     #kickoff extract_urls_to_news links flow
     ws = extract_urls_to_news(websites)
     #extract text data from the defined websites 
     website_datalist = extract_news(ws,websites)
     #push data into cloud storage 
-    push_to_s3('sap-webscrape-extract-s3-bucket',website_datalist)
+    push_to_s3(config.s3_block,website_datalist)
     return 
 
 

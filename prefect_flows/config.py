@@ -15,3 +15,9 @@ yahoo_fin_block_set = set(['https://www.yahoo.com/', 'https://mail.yahoo.com/', 
                 '/topic/earnings/', '/live/politics/', '/topic/economic-news/', '/topic/morning-brief/', '/topic/personal-finance-news/',
                 '/topic/crypto/', '/bidenomics/', '/quote/ES%3DF', '/chart/ES%3DF', '/quote/YM%3DF', '/chart/YM%3DF', '/quote/NQ%3DF', '/chart/NQ%3DF', '/quote/RTY%3DF', '/chart/RTY%3DF', 
                 '/quote/CL%3DF', '/chart/CL%3DF', '/quote/GC%3DF', '/chart/GC%3DF'])
+
+#define list of top-level websites to scrape 
+top_level_websites = ['https://finance.yahoo.com/news/','https://www.marketwatch.com/latest-news?mod=top_nav']
+
+#define name of S3 bucket Prefect Block 
+s3_block = 'sap-webscrape-extract-s3-bucket'
