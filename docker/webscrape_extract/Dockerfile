@@ -31,14 +31,14 @@ RUN git clone https://github.com/lau-allen/sentiment_analysis_pipeline.git
 #change working dir 
 WORKDIR /opt/sentiment_analysis_pipeline
 #install dependencies for pipeline 
-RUN pip install --trusted-host pypi.python.org -r requirements.txt 
+RUN pip install --trusted-host pypi.python.org -r ./docker/webscrape_extract/requirements.txt 
 
 #set up environment variable for Azure Key Vault URI
 ENV AZURE_KEY_VAULT_URI=https://prefectsentimentanalysis.vault.azure.net/
 
 #ensure permissions to run entrypoint 
-RUN chmod +x /opt/sentiment_analysis_pipeline/entrypoint.sh
+RUN chmod +x /opt/sentiment_analysis_pipeline/docker/webscrape_extract/entrypoint.sh
 #run entry point script 
 WORKDIR /opt/sentiment_analysis_pipeline
-ENTRYPOINT ["/opt/sentiment_analysis_pipeline/entrypoint.sh"]
+ENTRYPOINT ["/opt/sentiment_analysis_pipeline/docker/webscrape_extract/entrypoint.sh"]
 
