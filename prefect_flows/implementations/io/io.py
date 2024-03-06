@@ -1,4 +1,3 @@
-from prefect import flow 
 from prefect_aws.s3 import S3Bucket
 import json 
 import tempfile 
@@ -6,6 +5,10 @@ import os
 import asyncio
 
 class io:
+    """
+    io object encapsulates all logic for 
+    basic input/output operations with webscrape data, s3 
+    """
 
     def __init__(self,bucket_block:str):
         """
