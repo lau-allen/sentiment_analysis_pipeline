@@ -21,3 +21,9 @@ top_level_websites = ['https://finance.yahoo.com/news/','https://www.marketwatch
 
 #define name of S3 bucket Prefect Block 
 s3_block = 'sap-webscrape-extract-s3-bucket'
+
+#define AWS region name 
+aws_region = 'us-east-1'
+
+#define AWS Redshift connection secret name 
+redshift_secret = 'redshift_secret'
