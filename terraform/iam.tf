@@ -19,7 +19,7 @@ resource "aws_iam_user_policy" "sap_s3_policy" {
   policy = data.aws_iam_policy_document.sap_s3_permissions.json
 }
 
-## below code sourced from https://github.com/PrefectHQ/prefect-recipes/tree/main/devops/infrastructure-as-code/aws/tf-prefect2-ecs-agent
+##reference: https://github.com/PrefectHQ/prefect-recipes/tree/main/devops/infrastructure-as-code/aws/tf-prefect2-ecs-agent
 resource "aws_secretsmanager_secret" "prefect_api_key" {
   name                    = "prefect-api-key-${var.name}"
   recovery_window_in_days = var.secrets_manager_recovery_in_days

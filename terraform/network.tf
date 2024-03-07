@@ -1,4 +1,4 @@
-## below code sourced from https://github.com/PrefectHQ/prefect-recipes/tree/main/devops/infrastructure-as-code/aws/tf-prefect2-ecs-agent
+##reference: https://github.com/PrefectHQ/prefect-recipes/tree/main/devops/infrastructure-as-code/aws/tf-prefect2-ecs-agent
 resource "aws_security_group" "prefect_agent" {
   name        = "prefect-agent-sg-${var.name}"
   description = "ECS Prefect Agent"
