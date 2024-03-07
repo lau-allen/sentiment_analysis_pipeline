@@ -8,6 +8,9 @@
 # .tfstate files
 *.tfstate
 *.tfstate.*
+# .tfvars files 
+*.tfvars
+*.tfvars.json
 # other files 
 **/*.DS_Store
 **/__pycache__/
