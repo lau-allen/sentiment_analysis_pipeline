@@ -121,6 +121,7 @@ resource "aws_iam_role" "prefect_agent_task_role" {
             "ecs:StopTask",
             "ecs:TagResource",
             "iam:PassRole",
+            "secretsmanager:GetSecretValue",
             "logs:CreateLogGroup",
             "logs:CreateLogStream",
             "logs:GetLogEvents",

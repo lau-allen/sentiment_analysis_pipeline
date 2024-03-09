@@ -23,12 +23,13 @@ if __name__ == '__main__':
     #     )
     # s3_bucket.save(name=config.s3_block,overwrite=True)
 
-    #create ECS task block 
+    #create webscrape ECS task block 
     webscrape_extract_ecs_task = ECSTask(
         image="alau002/sap-webscrape-extract:latest",
         vpc_id=outputs['vpc_id']['value'],
         cluster=outputs['prefect_agent_cluster_name']['value'],
         execution_role_arn=outputs['prefect_agent_execution_role_arn']['value'],
+        task_role_arn=outputs["prefect_agent_task_role_arn"]['value'],
         task_customizations=[
             {
                 "op": "add",
@@ -39,4 +40,22 @@ if __name__ == '__main__':
         task_start_timeout_seconds=120
     )
     webscrape_extract_ecs_task.save(name=config.webscrape_ecs_task,overwrite=True)
+
+        #create ECS task block 
+    data_norm_ecs_task = ECSTask(
+        image="alau002/sap-data-normalization:latest",
+        vpc_id=outputs['vpc_id']['value'],
+        cluster=outputs['prefect_agent_cluster_name']['value'],
+        execution_role_arn=outputs['prefect_agent_execution_role_arn']['value'],
+        task_role_arn=outputs["prefect_agent_task_role_arn"]['value'],
+        task_customizations=[
+            {
+                "op": "add",
+                "path": "/networkConfiguration/awsvpcConfiguration/securityGroups",
+                "value": [outputs['prefect_agent_security_group']['value']]
+            }
+        ],
+        task_start_timeout_seconds=120
+    )
+    data_norm_ecs_task.save(name=config.webscrape_data_norm_task,overwrite=True)
     
