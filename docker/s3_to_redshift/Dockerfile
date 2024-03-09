@@ -5,8 +5,8 @@ FROM prefecthq/prefect:2-python3.10-conda
 RUN apt-get update && apt-get install -y \
     git
 
-#install Azure CLI 
-RUN pip install azure-cli
+# #install Azure CLI 
+# RUN pip install azure-cli
 
 #change working dir 
 WORKDIR /opt 
@@ -18,8 +18,8 @@ WORKDIR /opt/sentiment_analysis_pipeline
 #install dependencies for pipeline 
 RUN pip install --trusted-host pypi.python.org -r ./docker/s3_to_redshift/requirements.txt
 
-#set up environment variable for Azure Key Vault URI
-ENV AZURE_KEY_VAULT_URI=https://prefectsentimentanalysis.vault.azure.net/
+# #set up environment variable for Azure Key Vault URI
+# ENV AZURE_KEY_VAULT_URI=https://prefectsentimentanalysis.vault.azure.net/
 
 #ensure permissions to run entrypoint 
 RUN chmod +x /opt/sentiment_analysis_pipeline/docker/s3_to_redshift/entrypoint.sh

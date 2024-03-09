@@ -30,3 +30,6 @@ redshift_secret = 'sap_redshift_secret'
 
 #define AWS webscrape ECS task Prefect Block
 webscrape_ecs_task = "sap-webscrape-extract-ecs-task"
+
+#define AWS data normalization ECS task Prefect Block 
+webscrape_data_norm_task = 'sap-data-norm-ecs-task'

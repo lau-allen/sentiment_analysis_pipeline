@@ -31,26 +31,26 @@ def get_secret():
     return secret
 
 @task 
-def redshift_connection() -> redshift_connector.connect:
+def redshift_connection() -> None:
     #get and parse secret string
     secret_data = json.loads(get_secret())
 
-    # Extract Redshift connection details
-    redshift_username = secret_data['username']
-    redshift_password = secret_data['password']
-    redshift_host = secret_data['host']
-    redshift_port = secret_data['port']
-    redshift_db = secret_data['dbClusterIdentifier']
+    # # Extract Redshift connection details
+    # redshift_username = secret_data['username']
+    # redshift_password = secret_data['password']
+    # redshift_host = secret_data['host']
+    # redshift_port = secret_data['port']
+    # redshift_db = secret_data['dbClusterIdentifier']
 
-    #opening connection to Redshift cluster 
-    conn = redshift_connector.connect(
-        host = redshift_host,
-        database= redshift_db,
-        port = redshift_port, 
-        user = redshift_username,
-        password = redshift_password,
-    )
-    return conn 
+    # #opening connection to Redshift cluster 
+    # conn = redshift_connector.connect(
+    #     host = redshift_host,
+    #     database= redshift_db,
+    #     port = redshift_port, 
+    #     user = redshift_username,
+    #     password = redshift_password,
+    # )
+    # return conn 
 
 @task 
 def create_schema(connection:redshift_connector.connect) -> None:
@@ -66,11 +66,11 @@ def create_schema(connection:redshift_connector.connect) -> None:
 def data_normalization() -> None:
     #obtain Redshift Connection
     conn = redshift_connection()
-    #create schema if not exist 
-    create_schema(conn)
+    # #create schema if not exist 
+    # create_schema(conn)
 
-    #close connection 
-    conn.close()
+    # #close connection 
+    # conn.close()
 
     return 
 
