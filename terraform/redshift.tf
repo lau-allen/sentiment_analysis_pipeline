@@ -18,8 +18,9 @@ resource "aws_redshift_cluster" "redshift_cluster" {
 
 #create secret in AWS secret manager for Redshift connection details 
 resource "aws_secretsmanager_secret" "redshift_connection" {
-  description = "Redshift connect details"
-  name        = "redshift_secret"
+  description             = "Redshift connect details"
+  name                    = "sap_redshift_secret"
+  recovery_window_in_days = 0
 }
 
 #define secrete information 

@@ -3,7 +3,7 @@ resource "aws_cloudwatch_log_group" "prefect_agent_log_group" {
   name              = "prefect-agent-log-group-${var.name}"
   retention_in_days = var.agent_log_retention_in_days
 }
- 
+
 resource "aws_ecs_cluster" "prefect_agent_cluster" {
   name = "prefect-agent-${var.name}"
 }

@@ -26,7 +26,7 @@ s3_block = 'sap-webscrape-extract-s3-bucket'
 aws_region = 'us-east-1'
 
 #define AWS Redshift connection secret name 
-redshift_secret = 'redshift_secret'
+redshift_secret = 'sap_redshift_secret'
 
 #define AWS webscrape ECS task Prefect Block
 webscrape_ecs_task = "sap-webscrape-extract-ecs-task"
