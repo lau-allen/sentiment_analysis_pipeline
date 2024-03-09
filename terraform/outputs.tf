@@ -18,3 +18,7 @@ output "prefect_agent_security_group" {
 output "prefect_agent_cluster_name" {
   value = aws_ecs_cluster.prefect_agent_cluster.name
 }
+
+output "vpc_id" {
+  value = var.vpc_id
+}
