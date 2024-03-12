@@ -58,6 +58,12 @@ def redshift_connection() -> redshift_connector.connect:
     redshift_port = secret_data['port']
     redshift_db = secret_data['dbClusterIdentifier']
 
+    print(f'redshift_username:{redshift_username}')
+    print(f'redshift_password:{redshift_password}')
+    print(f'redshift_host:{redshift_host}')
+    print(f'redshift_port:{redshift_port}')
+    print(f'redshift_db:{redshift_db}')
+
     #opening connection to Redshift cluster 
     conn = redshift_connector.connect(
         host = redshift_host,
