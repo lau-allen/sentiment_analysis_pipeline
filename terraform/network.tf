@@ -1,8 +1,13 @@
-##reference: https://github.com/PrefectHQ/prefect-recipes/tree/main/devops/infrastructure-as-code/aws/tf-prefect2-ecs-agent
 resource "aws_security_group" "prefect_agent" {
   name        = "prefect-agent-sg-${var.name}"
   description = "ECS Prefect Agent"
   vpc_id      = var.vpc_id
+}
+
+resource "aws_security_group" "redshift_sg" {
+  name = "redshift-cluster-sg"
+  description = "Redshift Cluster SG"
+  vpc_id = var.vpc_id
 }
 
 resource "aws_security_group_rule" "https_outbound" {
@@ -19,4 +24,24 @@ resource "aws_security_group_rule" "https_outbound" {
   protocol          = "tcp"
   cidr_blocks       = ["0.0.0.0/0"]
 
+}
+
+#defining egress rule for ECS to allow outbound traffic to redshift point 
+resource "aws_security_group_rule" "redshift_outbound" {
+  type = "egress"
+  security_group_id = aws_security_group.prefect_agent.id
+  from_port = 5439
+  to_port = 5439
+  protocol = "tcp" 
+  cidr_blocks = ["0.0.0.0/0"]
+}
+
+#defining ingress rule for Redshift to allow inbound traffic 
+resource "aws_security_group_rule" "redshift_inbound" {
+  type = "ingress"
+  security_group_id = aws_security_group.redshift_sg.id
+  from_port = 5439
+  to_port = 5439
+  protocol = "tcp"
+  source_security_group_id = aws_security_group.prefect_agent.id
 }

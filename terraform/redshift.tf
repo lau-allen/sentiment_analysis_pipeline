@@ -14,6 +14,7 @@ resource "aws_redshift_cluster" "redshift_cluster" {
   node_type           = "dc2.large"
   cluster_type        = "single-node"
   skip_final_snapshot = true
+  vpc_security_group_ids = [aws_security_group.redshift_sg.id]
 }
 
 #create secret in AWS secret manager for Redshift connection details 
