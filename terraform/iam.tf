@@ -73,6 +73,8 @@ resource "aws_iam_role" "prefect_agent_execution_role" {
         {
           Action = [
             "logs:CreateLogGroup",
+            "logs:CreateLogStream",
+            "logs:PutLogEvents"
           ]
           Effect   = "Allow"
           Resource = "*"

@@ -59,7 +59,7 @@ def redshift_connection() -> redshift_connector.connect:
     # Extract Redshift connection details
     redshift_username = secret_data['username']
     redshift_password = secret_data['password']
-    redshift_host = secret_data['host']
+    redshift_host = secret_data['host'].split(':')[0]
     redshift_port = secret_data['port']
     redshift_db = secret_data['dbClusterIdentifier']
 
