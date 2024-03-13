@@ -7,7 +7,8 @@ from botocore.exceptions import ClientError
 import config
 import json
 import logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig() 
+logging.getLogger().setLevel(logging.INFO)
 
 def get_secret():
     """

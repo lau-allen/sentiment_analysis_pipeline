@@ -37,7 +37,8 @@ if __name__ == '__main__':
                 "value": [outputs['prefect_agent_security_group']['value']]
             }
         ],
-        task_start_timeout_seconds=120
+        task_start_timeout_seconds=120,
+        configure_cloudwatch_logs = True
     )
     webscrape_extract_ecs_task.save(name=config.webscrape_ecs_task,overwrite=True)
 
@@ -55,7 +56,8 @@ if __name__ == '__main__':
                 "value": [outputs['prefect_agent_security_group']['value']]
             }
         ],
-        task_start_timeout_seconds=120
+        task_start_timeout_seconds=120,
+        configure_cloudwatch_logs = True
     )
     data_norm_ecs_task.save(name=config.webscrape_data_norm_task,overwrite=True)
     
