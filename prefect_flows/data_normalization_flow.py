@@ -59,9 +59,10 @@ def redshift_connection() -> redshift_connector.connect:
     # Extract Redshift connection details
     redshift_username = secret_data['username']
     redshift_password = secret_data['password']
-    redshift_host = secret_data['host'].split(':')[0]
+    redshift_host = secret_data['host']+'/sap_db'
     redshift_port = secret_data['port']
-    redshift_db = secret_data['dbClusterIdentifier']
+    #redshift_db = secret_data['dbClusterIdentifier']
+    redshift_db = 'sap_db'
 
     logging.info("attempting to connect to redshift")
 
