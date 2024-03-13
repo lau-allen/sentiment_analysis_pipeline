@@ -22,6 +22,41 @@ variable "s3_policy" {
   default     = "sap-s3-policy"
 }
 
+variable "redshift_db_name" {
+  type = string 
+  description = "Defined name for database in Redshift"
+  default = "sap_db"
+}
+
+variable "redshift_master_username" {
+  type = string
+  description = "Defined username"
+}
+
+variable "redshift_node_type" {
+  type = string
+  description = "Node type for Redshift cluster"
+  default = "dc2.large"
+}
+
+variable "redshift_cluster_type" {
+  type = string
+  description = "Cluster type for Redshift cluster"
+  default = "single-node"
+}
+
+variable "redshift_cluster_name" {
+  type = string
+  description = "Cluster name"
+  default = "sap-redshift-cluster"
+}
+
+variable "redshift_secret_name" {
+  type = string
+  description = "Redshift secret name for storing information to connect via redshift_connector"
+  default = "sap_redshift_secret"
+}
+
 ## below code sourced from https://github.com/PrefectHQ/prefect-recipes/tree/main/devops/infrastructure-as-code/aws/tf-prefect2-ecs-agent
 variable "agent_cpu" {
   description = "CPU units to allocate to the agent"

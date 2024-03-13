@@ -7,12 +7,12 @@ resource "random_password" "password" {
 
 #create redshift cluster resource 
 resource "aws_redshift_cluster" "redshift_cluster" {
-  cluster_identifier  = "sap-redshift-cluster"
-  database_name       = "sap_db"
-  master_username     = "admin"
+  cluster_identifier  = var.redshift_cluster_name
+  database_name       = var.redshift_db_name
+  master_username     = var.redshift_master_username
   master_password     = random_password.password.result
-  node_type           = "dc2.large"
-  cluster_type        = "single-node"
+  node_type           = var.redshift_node_type
+  cluster_type        = var.redshift_cluster_type
   skip_final_snapshot = true
   vpc_security_group_ids = [aws_security_group.redshift_sg.id]
 }
@@ -20,7 +20,7 @@ resource "aws_redshift_cluster" "redshift_cluster" {
 #create secret in AWS secret manager for Redshift connection details 
 resource "aws_secretsmanager_secret" "redshift_connection" {
   description             = "Redshift connect details"
-  name                    = "sap_redshift_secret"
+  name                    = var.redshift_secret_name
   recovery_window_in_days = 0
 }
 
