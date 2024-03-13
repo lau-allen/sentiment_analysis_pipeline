@@ -6,6 +6,7 @@ import boto3
 from botocore.exceptions import ClientError
 import config
 import json
+import logging
 
 def get_secret():
     """
@@ -37,6 +38,8 @@ def get_secret():
     #return json of stored secret 
     secret = get_secret_value_response['SecretString']
 
+    logging.info(f"retrieved secret {secret}")
+
     return secret
 
 @task 
@@ -58,11 +61,7 @@ def redshift_connection() -> redshift_connector.connect:
     redshift_port = secret_data['port']
     redshift_db = secret_data['dbClusterIdentifier']
 
-    print(f'redshift_username:{redshift_username}')
-    print(f'redshift_password:{redshift_password}')
-    print(f'redshift_host:{redshift_host}')
-    print(f'redshift_port:{redshift_port}')
-    print(f'redshift_db:{redshift_db}')
+    logging.info("attempting to connect to redshift")
 
     #opening connection to Redshift cluster 
     conn = redshift_connector.connect(
